@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block css_link %}<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">{% endblock %}
+{% block title %}Dashboard{% endblock %}
+
+{% block firstletter %}{{ user_firstletter }}{% endblock %}
+
+{% block main %}
+<p class="login-message">{{ get_flashed_messages()[0] }}</p>
+
+<div class="container">
+    <h1>Boas vindas!</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi natus, veritatis doloribus labore consectetur optio cum quis sapiente sequi culpa magni facilis aliquam ab minus, itaque quod amet. Quasi, nemo?</p>
+</div>
+{% endblock %}

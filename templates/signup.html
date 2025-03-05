@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='signin.css') }}">
+    <title>Flask site</title>
+</head>
+
+<body>
+    <p class="login-message">{{ get_flashed_messages()[0] }}</p>
+
+    <main>
+        <div class="container">
+            <form action="{{ url_for('createuser') }}" method="POST" autocomplete="on">
+                <h1>Cadastro</h1>
+                <fieldset>
+                    <div class="field">
+                        <input type="text" id="name" name="name" placeholder="João Silva" required>
+                        <label for="name">Nome</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field">
+                        <input type="text" id="username" name="username" placeholder="JoaoS" required>
+                        <label for="username">Usuário</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field">
+                        <input type="text" id="password" name="password" placeholder="333" required>
+                        <label for="password">Senha</label>
+                    </div>
+                </fieldset>
+                <input type="submit" value="Cadastrar usuário" id="submit">
+                <a href="{{ url_for('dashboard') }}" id="cancel">Cancelar</a>
+            </form>
+        </div>        
+    </main>
+</body>
+</html>

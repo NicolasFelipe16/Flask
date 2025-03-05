@@ -1,0 +1,23 @@
+/* table{
+    white-space: nowrap;
+    border-collapse: collapse;
+    border: 1px solid var(--color-01);
+    color: var(--color-01);
+    border-radius: 25px;
+}
+
+table th {
+    text-align: center;
+    background-color: var(--color-01);
+    color: var(--color-02);
+    padding: 10px 20px;
+}
+
+table tr {
+    border-bottom: 1px solid var(--color-01);
+}
+
+table td{
+    min-width: 150px;
+    padding: 7px 20px;
+} */

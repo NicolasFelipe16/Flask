@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    {% block css_link %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+    <header>
+        <a class="name" href="{{ url_for('account') }}">{% block firstletter %}{% endblock %}</a>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/dashboard" class="{{ 'active-page' if request.path == '/dashboard' else '' }}">Dashboard</a></li>
+            <li><a href="/products" class="{{ 'active-page' if request.path == '/products' else '' }}">Produtos</a></li>
+            <li><a href="/newproduct" class="{{ 'active-page' if request.path == '/newproduct' else '' }}">Cadastrar produto</a></li>
+            <li><a href="/signout" class="{{ 'active-page' if request.path == '/signout' else '' }}">Sair</a></li>
+            <li><a href="/users" class="{{ 'active-page' if request.path == '/users' else '' }}">Usuários</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block css_link %}
+<link rel="stylesheet" href="{{ url_for('static', filename='products.css') }}">{% endblock %}
+{% block title %}Usuários{% endblock %}
+
+{% block firstletter %}{{ user_firstletter }}{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h1>Produtos cadastrados</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ product.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
