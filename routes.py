@@ -1,31 +1,112 @@
 from flask import render_template, request, redirect, session, flash, url_for, g
 from main import app
-# from classes import loged_user
-import sqlite3
+import psycopg2
 
-database = sqlite3.connect('database.db')
+# import sqlite3
+
+# database = sqlite3.connect('database.db')
+
+# cursor = database.cursor()
+
+# database.close()
+
+# Função para obter a conexão com o banco de dados
+# def get_db():
+#     if 'db' not in g:
+#         g.db = sqlite3.connect('database.db')
+#         g.db.row_factory = sqlite3.Row  # Isso ajuda a manipular os dados como dicionários
+#     return g.db
+
+# # Fechar a conexão após a requisição
+# @app.teardown_appcontext
+# def close_db(error):
+#     db = getattr(g, 'db', None)
+#     if db is not None:
+#         db.close()
+
+
+
+
+
+render_hostname = 'dpg-cvf1985ds78s73ffs7j0-a.oregon-postgres.render.com'
+render_port = 5432
+render_database = 'meu_banco_t32u'
+render_username = 'meu_banco_t32u_user'
+render_password = 'gxacHJu3kKndEv6mTJmCoA7DcToa2iac'
+
+database = psycopg2.connect(
+    host=render_hostname,
+    port=render_port,
+    database=render_database,
+    user=render_username,
+    password=render_password)
 
 cursor = database.cursor()
 
-database.close()
-
-# Função para obter a conexão com o banco de dados
+# Função para obter a conexão com o banco de dados PostgreSQL
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('database.db')
-        g.db.row_factory = sqlite3.Row  # Isso ajuda a manipular os dados como dicionários
+        g.db = psycopg2.connect(
+            host='dpg-cvf1985ds78s73ffs7j0-a.oregon-postgres.render.com',  # Endereço do servidor PostgreSQL
+            port=5432,  # Porta padrão do PostgreSQL
+            database='meu_banco_t32u',  # Nome do banco de dados
+            user='meu_banco_t32u_user',  # Usuário do banco de dados
+            password='gxacHJu3kKndEv6mTJmCoA7DcToa2iac'  # Senha do banco de dados
+        )
     return g.db
 
 # Fechar a conexão após a requisição
 @app.teardown_appcontext
 def close_db(error):
-    db = getattr(g, 'db', None)
-    if db is not None:
+    db = getattr(g, 'db', None)  # Obtém a conexão armazenada no contexto da requisição
+    if db is not None:  # Se houver uma conexão aberta, fecha ela
         db.close()
+
+
+
+@app.before_request
+def create_tables():
+    db = get_db()
+    cursor = db.cursor()
+
+    # Criação da tabela 'users' se não existir
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,  -- Adicionando um id autoincremento
+        name VARCHAR(100) NOT NULL,
+        username VARCHAR(30) NOT NULL UNIQUE,
+        password VARCHAR(20) NOT NULL,
+        permission VARCHAR(20)
+    );
+    ''')
+    db.commit()
+
+    # Criação da tabela 'products' se não existir
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,  -- Adicionando um id autoincremento
+        name VARCHAR(255),
+        category VARCHAR(255),
+        price INTEGER
+    );
+    ''')
+    db.commit()
 
 
 @app.route('/')
 def index():
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute('''
+                   CREATE TABLE IF NOT EXISTS users (
+                    name varchar(100) not null,
+                    username varchar(30) not null,
+                    password varchar(20) not null,
+                    permission varchar(20)
+                   );
+                   ''')
+    
     return render_template('index.html')
 
 @app.route('/signin')
@@ -46,7 +127,7 @@ def createuser():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute('INSERT INTO users (name, username, password, permission) VALUES (?, ?, ?, ?)', (name, username, password, permission))
+    cursor.execute('INSERT INTO users (name, username, password, permission) VALUES (%s, %s, %s, %s)', (name, username, password, permission))
     db.commit()
 
     # session['username'] = user['name']
@@ -71,12 +152,13 @@ def newproduct():
     cursor = db.cursor()
 
     cursor.execute('''
-               CREATE TABLE IF NOT EXISTS products (
-                   name TEXT,
-                   category TEXT,
-                   price INTEGER
-               )
-               ''')
+                   CREATE TABLE IF NOT EXISTS products (
+                    name VARCHAR(255),
+                    category VARCHAR(255),
+                    price INTEGER
+                   );
+                   ''')
+
 
     user_firstletter = session['username']
 
@@ -99,18 +181,21 @@ def authenticate():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute('SELECT name, username, password, permission FROM users WHERE username = ?', (username,))
+    cursor.execute('SELECT name, username, password, permission FROM users WHERE username = %s', (username,))
     user = cursor.fetchone()
 
     if user:
-        if password == user['password']:
-            session['username'] = user['name']
+        # if password == user['password']:
+        if password == user[2]:
+            # session['username'] = user['name']
+            session['username'] = user[0]
             flash('Olá, ' + session['username'] + '!')
             return redirect(url_for('dashboard'))
         else:
             flash('Senha incorreta. Tente novamente...')
+            return redirect(url_for('signin'))
     else:
-        flash('Não foi possível logar esse usuário. Tente novamente...')
+        flash('Esse usuário não existe. Tente novamente ou crie uma conta...')
         return redirect(url_for('signin'))
 
 
@@ -123,7 +208,7 @@ def createproduct():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute('INSERT INTO products (name, category, price) VALUES (?, ?, ?)', (name, category, price))
+    cursor.execute('INSERT INTO products (name, category, price) VALUES (%s, %s, %s)', (name, category, price))
     db.commit()
 
     return redirect(url_for('products_list'))
@@ -138,6 +223,14 @@ def products_list():
     cursor.execute('SELECT name, category, price FROM products')
     products = cursor.fetchall()
 
+    # print(products)
+
+    # for p in products:
+    #     print(p[0])
+    #     print(p[1])
+    #     print(p[2])
+
+
     user_firstletter = session['username']
 
     return render_template('products.html', products=products, user_firstletter=user_firstletter)
@@ -150,7 +243,7 @@ def users_list():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute('SELECT name, username, password, permission FROM users WHERE name = ?', (session['username'],))
+    cursor.execute('SELECT name, username, password, permission FROM users WHERE name = %s', (session['username'],))
     loged_user = cursor.fetchone()
 
     cursor.execute('SELECT name, username, password, permission FROM users')
@@ -158,7 +251,8 @@ def users_list():
 
     user_firstletter = session['username']
 
-    if loged_user['permission'] == 'administrator':
+    # if loged_user['permission'] == 'administrator':
+    if loged_user[3] == 'administrator':
         user_firstletter = session['username']
         return render_template('users.html', users=users, user_firstletter=user_firstletter)  
     
@@ -176,7 +270,7 @@ def account():
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT name, username, password, permission FROM users WHERE name = ?', (session['username'],))
+    cursor.execute('SELECT name, username, password, permission FROM users WHERE name = %s', (session['username'],))
     user = cursor.fetchone()
 
     user_firstletter = session['username']
