@@ -249,7 +249,7 @@ def users_list():
     user_firstletter = session['username']
 
     # if loged_user['permission'] == 'administrator':
-    if loged_user[4] == 'administrator':
+    if loged_user[3] == 'administrator':
         user_firstletter = session['username']
         return render_template('users.html', users=users, user_firstletter=user_firstletter)  
     
