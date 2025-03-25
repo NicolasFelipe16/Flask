@@ -43,23 +43,23 @@ database = psycopg2.connect(
 
 cursor = database.cursor()
 
-# Função para obter a conexão com o banco de dados PostgreSQL
+
 def get_db():
     if 'db' not in g:
         g.db = psycopg2.connect(
-            host='dpg-cvf1985ds78s73ffs7j0-a.oregon-postgres.render.com',  # Endereço do servidor PostgreSQL
-            port=5432,  # Porta padrão do PostgreSQL
-            database='meu_banco_t32u',  # Nome do banco de dados
-            user='meu_banco_t32u_user',  # Usuário do banco de dados
-            password='gxacHJu3kKndEv6mTJmCoA7DcToa2iac'  # Senha do banco de dados
+            host='dpg-cvf1985ds78s73ffs7j0-a.oregon-postgres.render.com',
+            port=5432,
+            database='meu_banco_t32u',
+            user='meu_banco_t32u_user',
+            password='gxacHJu3kKndEv6mTJmCoA7DcToa2iac'
         )
     return g.db
 
-# Fechar a conexão após a requisição
+
 @app.teardown_appcontext
 def close_db(error):
-    db = getattr(g, 'db', None)  # Obtém a conexão armazenada no contexto da requisição
-    if db is not None:  # Se houver uma conexão aberta, fecha ela
+    db = getattr(g, 'db', None)
+    if db is not None:
         db.close()
 
 
@@ -69,10 +69,8 @@ def create_tables():
     db = get_db()
     cursor = db.cursor()
 
-    # Criação da tabela 'users' se não existir
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,  -- Adicionando um id autoincremento
         name VARCHAR(100) NOT NULL,
         username VARCHAR(30) NOT NULL UNIQUE,
         password VARCHAR(20) NOT NULL,
@@ -81,10 +79,8 @@ def create_tables():
     ''')
     db.commit()
 
-    # Criação da tabela 'products' se não existir
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS products (
-        id SERIAL PRIMARY KEY,  -- Adicionando um id autoincremento
         name VARCHAR(255),
         category VARCHAR(255),
         price INTEGER
@@ -106,6 +102,7 @@ def index():
                     permission varchar(20)
                    );
                    ''')
+    
     
     return render_template('index.html')
 
@@ -158,7 +155,7 @@ def newproduct():
                     price INTEGER
                    );
                    ''')
-
+    db.commit()
 
     user_firstletter = session['username']
 
